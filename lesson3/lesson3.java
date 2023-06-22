@@ -2,12 +2,31 @@ package lesson3;
 
 import org.w3c.dom.ls.LSOutput;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class lesson3 {
     public static void main(String[] args) {
         String[] firstUser = userData();
-        dataCheck(firstUser);
+        boolean check = dataCheck(firstUser);
+        if (check) {
+            Path path = Paths.get("output.txt");
+            String contents = new String();
+            for (String i: firstUser) {
+                contents = contents + i + " ";
+            }
+            contents = contents + "\n";
+            try {Files.writeString(path, contents, StandardCharsets.UTF_8);
+            } catch (IOException ex) {
+                System.out.println("Не удалось сохранить файл");
+            }
+        }
     }
 
     public static String[] userData () {
@@ -28,7 +47,8 @@ public class lesson3 {
         return userData;
     }
 
-    public static void dataCheck (String[] userData) {
+    public static boolean dataCheck (String[] userData) {
+        int checkCount = 0;
         int spaceCount = 0;
         for (char c : userData[0].toCharArray()) {
             if (c == ' ') {
@@ -36,6 +56,7 @@ public class lesson3 {
             }
         }
         if (spaceCount != 2) {
+            checkCount++;
             throw new RuntimeException("Не корректно введены ФИО.");
         }
         int pointCount = 0;
@@ -45,24 +66,32 @@ public class lesson3 {
             }
         }
         if (pointCount != 2) {
+            checkCount++;
             throw new RuntimeException("Не корректно введена дата рождения.");
         }
         int numberCount = 0;
         try {
-            Integer number = Integer.parseInt(userData[2]);
-            while (number > 0) {
-                numberCount++;
-                number = number/10;
+            String[] number = userData[2].split("");
+            for (String i: number) {
+                int n = Integer.parseInt(i);
             }
-            if (numberCount != 11) {
+            if (number.length != 11) {
+                checkCount++;
                 throw new RuntimeException("Не корректно введен номер телефона, должно быть 11 цифр.");
             }
         }catch (Exception e) {
             System.out.println("В телефоне введены не только числа");
+            checkCount++;
         }
 
-        if (!userData[3].equalsIgnoreCase("f") || !userData[3].equalsIgnoreCase("m")) {
+        if (!userData[3].equalsIgnoreCase("f") && !userData[3].equalsIgnoreCase("m")) {
+            checkCount++;
             throw new RuntimeException("Не корректно введен пол.");
+        }
+        if (checkCount == 0) {
+            return true;
+        } else {
+            return false;
         }
     }
 
